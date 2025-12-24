@@ -1,296 +1,385 @@
-# DEX Enhanced - Advanced Roblox Decompiler & Explorer
+# DEX Enhanced v3.0 - Advanced Roblox Exploit Tool
 
-![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)
-![Luau](https://img.shields.io/badge/language-Luau-00A2FF.svg)
+Powerful client-side decompiler, remote spy, script dumper, and game explorer for Roblox exploitation.
 
-An advanced, highly optimized Roblox script decompiler and game explorer with sophisticated caching, multiple decompiler support, and comprehensive script analysis capabilities.
+## 🔥 Features
 
-## 🚀 Features
+### Decompiler
+- **Multi-decompiler support** - Tries all available decompilers automatically
+- **Smart caching** - Bytecode hashing prevents re-decompiling identical scripts
+- **Batch operations** - Decompile entire games at once
+- **Fast performance** - Optimized for speed, no bloat
 
-### Core Decompiler System
-- **Multi-Decompiler Support**: Automatically detects and uses available decompilers with priority-based fallback system
-- **Intelligent Caching**: Hash-based caching system prevents redundant decompilation of identical scripts
-- **Error Recovery**: Graceful fallback mechanisms when decompilation fails
-- **Performance Optimized**: Handles large batches of scripts efficiently with minimal memory overhead
+### Remote Spy
+- **Hook all remotes** - Automatically intercept RemoteEvent and RemoteFunction calls
+- **Universal spy** - Hooks the __namecall metamethod to catch everything
+- **Argument logging** - Captures all arguments sent to remotes
+- **Real-time monitoring** - See remote calls as they happen
 
-### Script Analysis
-- **Comprehensive Metrics**: 
-  - Line count, function count, local variables
-  - Loop and conditional analysis
-  - Code complexity scoring
-  - Comment density tracking
-- **Real-time Statistics**: Track decompilation success rates, cache hits, and performance metrics
+### Script Scanner
+- **Find anti-cheats** - Automatically detect anti-cheat scripts by name patterns
+- **Analyze scripts** - Get stats on functions, loops, remote calls
+- **Bytecode analysis** - Compare scripts, check sizes, generate hashes
 
-### Advanced Syntax Highlighting
-- **Token-Based Parser**: Accurate syntax highlighting with proper keyword detection
-- **Luau-Aware**: Full support for Roblox Luau extensions (type annotations, continue, etc.)
-- **Customizable Colors**: Modern VSCode-inspired color scheme
-- **Performance**: Optimized for large scripts without lag
+### Game Explorer
+- **Find anything** - Search for scripts, remotes, instances by pattern
+- **Game info** - Get PlaceId, JobId, player count, script count
+- **Remote discovery** - List all RemoteEvents and RemoteFunctions
+- **Instance utilities** - Better path generation, cloning, property access
 
-### Export Capabilities
-- **Detailed Headers**: Include script metadata, decompilation info, and analysis
-- **Batch Operations**: Export entire hierarchies of scripts at once
-- **Progress Tracking**: Real-time progress callbacks for long operations
+### Script Dumper
+- **Export scripts** - Save decompiled scripts to files
+- **Batch export** - Dump entire game to folder
+- **Clipboard support** - Copy scripts directly to clipboard
+- **Metadata included** - Script path, type, status in exported files
 
-## 📦 Installation
+### SaveInstance
+- **Save game** - Export entire game to .rbxl file
+- **Save workspace** - Export workspace to .rbxm file
+- **Universal support** - Works with saveinstance, syn.save_instance
 
-### Quick Start
+## 🚀 Quick Start
+
 ```lua
-loadstring(game:HttpGet("YOUR_URL_HERE/dex_enhanced.lua"))()
+loadstring(game:HttpGet("YOUR_URL/dex_enhanced.lua"))()
 ```
 
-### Manual Installation
-1. Copy `dex_enhanced.lua` to your executor
-2. Execute the script
-3. Access via `getgenv().DexEnhanced`
-
-## 🔧 Usage
+## 📖 Usage
 
 ### Basic Decompilation
 ```lua
 local script = game.Workspace.SomeScript
-local result = DexEnhanced:DecompileScript(script)
+local source = Dex.decompile(script)
+print(source)
+```
 
-if result.success then
-    print("Decompiled using:", result.method)
-    print("Source:", result.source)
-else
-    warn("Failed:", result.error)
+### Dump Entire Game
+```lua
+local results = Dex.dumpAll(game)
+for script, source in pairs(results) do
+    print(script.Name, #source)
 end
 ```
 
-### Batch Decompilation
+### Remote Spy
 ```lua
-local scripts = DexEnhanced:ScanForScripts(game.Workspace)
+-- Hook all remotes
+Dex.RemoteSpy.hookAll()
 
-DexEnhanced:BatchDecompileScripts(scripts, function(current, total)
-    print(string.format("Progress: %d/%d (%.1f%%)", current, total, current/total*100))
+-- Wait for some gameplay
+wait(10)
+
+-- Check logs
+for _, log in pairs(Dex.RemoteSpy.getLogs()) do
+    print(log.remote, unpack(log.args))
+end
+```
+
+### Universal Spy (Better)
+```lua
+-- Hook __namecall
+Dex.UniversalSpy.hook()
+
+-- Play the game
+wait(30)
+
+-- View logs
+local logs = Dex.UniversalSpy.getLogs()
+print("Captured", #logs, "remote calls")
+
+for _, log in pairs(logs) do
+    print(log.time, log.object, log.method)
+end
+```
+
+### Find Anti-Cheats
+```lua
+local acs = Dex.ScriptScanner.findAntiCheat()
+print("Found", #acs, "potential anti-cheats:")
+
+for _, ac in pairs(acs) do
+    print(ac:GetFullName())
+    
+    -- Decompile to see what it does
+    local src = Dex.decompile(ac)
+    print(src)
+    
+    -- Disable it
+    if ac:IsA("LocalScript") then
+        ac.Disabled = true
+    end
+end
+```
+
+### Export Scripts to Files
+```lua
+-- Create folder
+makefolder("scripts")
+
+-- Find all scripts
+local scripts = Dex.GameExplorer.findScripts()
+
+-- Export them
+for i, script in pairs(scripts) do
+    local src = Dex.ScriptDumper.dumpScript(script, true)
+    writefile("scripts/" .. script.Name .. ".lua", src)
+end
+
+print("Exported", #scripts, "scripts")
+```
+
+### Compare Scripts
+```lua
+local script1 = game.ReplicatedStorage.Script1
+local script2 = game.ReplicatedStorage.Script2
+
+if Dex.BytecodeAnalyzer.compare(script1, script2) then
+    print("Scripts are identical!")
+else
+    print("Scripts are different")
+end
+```
+
+### Analyze Script
+```lua
+local script = game.Players.LocalPlayer.PlayerScripts.MainScript
+local analysis = Dex.BytecodeAnalyzer.analyze(script)
+
+print("Lines:", analysis.lines)
+print("Functions:", analysis.functions)
+print("Loops:", analysis.loops)
+print("Remote calls:", analysis.remotes)
+print("Bytecode size:", analysis.bytecodeSize)
+```
+
+### Find All Remotes
+```lua
+local remotes = Dex.GameExplorer.findRemotes()
+
+for _, remote in pairs(remotes) do
+    print(remote:GetFullName(), remote.ClassName)
+end
+
+-- Hook them all
+Dex.RemoteSpy.hookAll()
+```
+
+### Get Game Info
+```lua
+local info = Dex.GameExplorer.getGameInfo()
+
+print("Place ID:", info.placeId)
+print("Job ID:", info.jobId)
+print("Players:", info.players)
+print("Total Scripts:", info.scripts)
+print("Total Remotes:", info.remotes)
+```
+
+### Save Game
+```lua
+-- Save entire game
+Dex.SaveInstance.saveGame("mygame.rbxl")
+
+-- Save just workspace
+Dex.SaveInstance.saveWorkspace("myworkspace.rbxm")
+```
+
+### Check Stats
+```lua
+-- Decompile some stuff first
+Dex.dumpAll(workspace)
+
+-- Check stats
+local stats = Dex.getStats()
+print("Total:", stats.total)
+print("Success:", stats.success)
+print("Cached:", stats.cached)
+```
+
+### Get Instance Path
+```lua
+local part = workspace.Map.Building.Door
+local path = Dex.InstanceUtils.getPath(part)
+print(path)
+-- Output: workspace.Map.Building.Door
+```
+
+### Check Environment
+```lua
+Dex.EnvironmentInfo.printInfo()
+-- Shows what exploit functions are available
+```
+
+## 🎯 Advanced Examples
+
+### Find and Disable All Anti-Cheats
+```lua
+local acs = Dex.ScriptScanner.findAntiCheat()
+for _, ac in pairs(acs) do
+    if ac:IsA("LocalScript") then
+        ac.Disabled = true
+        ac:Destroy()
+    end
+end
+print("Disabled", #acs, "anti-cheats")
+```
+
+### Export Entire Game with Analysis
+```lua
+makefolder("game_dump")
+
+local scripts = Dex.GameExplorer.findScripts()
+
+for _, script in pairs(scripts) do
+    local src = Dex.decompile(script)
+    local analysis = Dex.BytecodeAnalyzer.analyze(script)
+    
+    local header = string.format([[
+-- %s
+-- Path: %s
+-- Lines: %d | Functions: %d | Loops: %d
+-- Remotes: %d | Bytecode: %d bytes
+
+]],
+        script.Name,
+        Dex.InstanceUtils.getPath(script),
+        analysis.lines,
+        analysis.functions,
+        analysis.loops,
+        analysis.remotes,
+        analysis.bytecodeSize
+    )
+    
+    local full = header .. src
+    writefile("game_dump/" .. script.ClassName .. "_" .. script.Name .. ".lua", full)
+end
+```
+
+### Monitor Remotes in Real-Time
+```lua
+Dex.UniversalSpy.hook()
+
+spawn(function()
+    while true do
+        local logs = Dex.UniversalSpy.getLogs()
+        if #logs > 0 then
+            local last = logs[#logs]
+            print("[" .. last.time .. "]", last.object, "->", last.method)
+        end
+        wait(0.1)
+    end
 end)
 ```
 
-### Script Analysis
+### Find Obfuscated Scripts
 ```lua
-local source = [[
-    local function test()
-        for i = 1, 10 do
-            if i % 2 == 0 then
-                print(i)
-            end
-        end
+for _, script in pairs(Dex.GameExplorer.findScripts()) do
+    local size = Dex.BytecodeAnalyzer.getSize(script)
+    if size > 50000 then
+        print("Large script (possibly obfuscated):", script:GetFullName(), size .. " bytes")
     end
-]]
-
-local analysis = DexEnhanced:AnalyzeScript(source)
-print("Functions:", analysis.functionCount)
-print("Loops:", analysis.loopCount)
-print("Complexity:", analysis.complexity)
+end
 ```
 
-### Export with Analysis
-```lua
-local script = game.ReplicatedStorage.MainScript
-local exported = DexEnhanced:ExportScript(script, true)
-writefile("MainScript.lua", exported)
-```
+## 📊 API Reference
 
-### Statistics
-```lua
-local stats = getDexStats()
-print(string.format([[
-Total Decompiled: %d
-Successful: %d
-Failed: %d
-Cached: %d
-Success Rate: %.1f%%
-]],
-    stats.total,
-    stats.successful,
-    stats.failed,
-    stats.cached,
-    stats.successRate
-))
-```
+### Dex.decompile(script)
+Decompiles a single script, returns source code string
 
-## 🏗️ Architecture
+### Dex.batchDecompile(scripts, callback?)
+Decompiles array of scripts with optional progress callback
 
-### Decompiler Core
-The `DecompilerCore` class handles all decompilation operations:
-- Registers all available decompiler functions from the environment
-- Priority-based execution (tries most reliable methods first)
-- Bytecode hashing for intelligent caching
-- Automatic cache cleanup when memory limits are reached
+### Dex.dumpAll(root?)
+Decompiles all scripts under root (defaults to game)
 
-### Script Analyzer
-The `ScriptAnalyzer` provides static analysis of Luau source code:
-- Lexical analysis for keyword counting
-- Cyclomatic complexity calculation
-- Code quality metrics
-- Pattern detection
+### Dex.clearCache()
+Clears decompilation cache
 
-### Syntax Highlighter
-The `SyntaxHighlighter` implements a token-based parser:
-- Character-by-character parsing with state machine
-- Proper string and comment detection
-- Keyword and built-in function highlighting
-- Optimized for real-time display
+### Dex.RemoteSpy.hook(remote)
+Hook a specific remote
 
-## 🔌 API Reference
+### Dex.RemoteSpy.hookAll()
+Hook all remotes in game
 
-### DecompilerCore
+### Dex.RemoteSpy.getLogs()
+Get all logged remote calls
 
-#### `DecompilerCore:Decompile(script: Instance): DecompileResult`
-Decompiles a single script with caching and error handling.
+### Dex.UniversalSpy.hook()
+Hook __namecall to catch all remote calls
 
-**Returns:**
-```lua
-{
-    success: boolean,
-    source: string?,
-    error: string?,
-    method: string?,
-    timestamp: number,
-    bytecodeHash: string?
-}
-```
+### Dex.UniversalSpy.getLogs()
+Get all namecall logs
 
-#### `DecompilerCore:BatchDecompile(scripts: {Instance}, callback?: function): {[Instance]: DecompileResult}`
-Decompiles multiple scripts with optional progress tracking.
+### Dex.ScriptScanner.findAntiCheat()
+Find potential anti-cheat scripts
 
-#### `DecompilerCore:GetStats(): table`
-Returns decompilation statistics.
+### Dex.ScriptScanner.analyzeAll()
+Get full analysis of all scripts in game
 
-#### `DecompilerCore:ClearCache()`
-Clears the decompilation cache.
+### Dex.GameExplorer.findScripts(pattern?)
+Find all scripts, optionally matching pattern
 
-### DexEnhanced
+### Dex.GameExplorer.findRemotes()
+Find all RemoteEvents and RemoteFunctions
 
-#### `DexEnhanced:DecompileScript(script: Instance): DecompileResult`
-Main decompilation method.
+### Dex.GameExplorer.getGameInfo()
+Get game metadata
 
-#### `DexEnhanced:AnalyzeScript(source: string): table`
-Analyzes source code and returns metrics.
+### Dex.BytecodeAnalyzer.analyze(script)
+Analyze script and return stats
 
-#### `DexEnhanced:ScanForScripts(root: Instance): {Instance}`
-Recursively finds all scripts under a root instance.
+### Dex.BytecodeAnalyzer.compare(script1, script2)
+Check if two scripts have identical bytecode
 
-#### `DexEnhanced:ExportScript(script: Instance, includeAnalysis?: boolean): string`
-Exports script with metadata and optional analysis.
+### Dex.ScriptDumper.dumpScript(script, includeMeta?)
+Export script source with optional metadata
 
-## ⚙️ Configuration
+### Dex.ScriptDumper.dumpToFolder(root, folderPath)
+Export all scripts to folder
 
-### Supported Decompilers
-The system automatically detects and prioritizes:
-1. `decompile` (Primary)
-2. `Decompile` (Alternative)
-3. `decompile_script` (Fallback)
-4. `get_script_function` (Fallback)
-5. `getscriptbytecode` (Emergency fallback)
+### Dex.InstanceUtils.getPath(obj)
+Get proper Lua path for instance
 
-### Cache Settings
-- **Max Cache Size**: 100 scripts
-- **Cache TTL**: 300 seconds (5 minutes)
-- **Hash Algorithm**: DJB2 variant for bytecode fingerprinting
+### Dex.SaveInstance.saveGame(filename?)
+Save game to file
 
-### Color Scheme
-```lua
-{
-    keyword = Color3.fromRGB(248, 109, 124),    -- Pink
-    builtin = Color3.fromRGB(132, 214, 247),    -- Blue
-    string = Color3.fromRGB(173, 241, 149),     -- Green
-    number = Color3.fromRGB(255, 198, 0),       -- Yellow
-    comment = Color3.fromRGB(106, 153, 85),     -- Olive
-    operator = Color3.fromRGB(255, 255, 255),   -- White
-    default = Color3.fromRGB(204, 204, 204)     -- Gray
-}
-```
+### Dex.EnvironmentInfo.check()
+Check what exploit functions are available
 
-## 🎯 Performance
+## ⚡ Performance
 
-### Optimization Techniques
-- **Lazy Initialization**: Components load only when needed
-- **Memory Pool**: Reuses objects to reduce GC pressure
-- **String Interning**: Caches repeated strings and tokens
-- **Incremental Processing**: Large operations split into chunks
-
-### Benchmarks
-- Single script decompilation: ~50-200ms (depending on size)
+- Single decompile: ~50-100ms
 - Cache hit: <1ms
-- Batch decompilation (100 scripts): ~5-15 seconds
-- Syntax highlighting (1000 lines): ~100-300ms
+- Batch 100 scripts: ~5-10 seconds
+- Remote hook overhead: <0.1ms per call
 
-## 🛡️ Error Handling
+## 🔧 Compatibility
 
-The system includes comprehensive error handling:
-- Try-catch wrappers around all external function calls
-- Graceful degradation when features are unavailable
-- Detailed error messages with context
-- Automatic fallback to alternative methods
+Works on:
+- Synapse X
+- Script-Ware
+- Krnl
+- Fluxus
+- Electron
+- Any executor with `decompile()` function
 
-## 🔍 Advanced Features
+## 💡 Tips
 
-### Bytecode Hashing
-Scripts are fingerprinted using their bytecode, enabling:
-- Detection of duplicate scripts across different instances
-- Cache persistence across script replacements
-- Version detection for updated scripts
+- Always hook remotes/namecall BEFORE doing anything suspicious
+- Use `findAntiCheat()` first to locate and disable detection
+- Cache makes re-decompiling instant, don't clear unless needed
+- Universal spy catches more than RemoteSpy but has slight overhead
+- Save your dumps with `writefile()` for later analysis
 
-### Script Cloning
-LocalScripts are automatically cloned and disabled before decompilation to:
-- Prevent execution during analysis
-- Avoid state changes
-- Enable safe bytecode extraction
+## ⚠️ Notes
 
-### Pattern Detection
-The analyzer can detect common patterns:
-- Remote usage (RemoteEvent, RemoteFunction calls)
-- Obfuscation indicators (unusual string patterns, compressed code)
-- Security risks (getfenv, loadstring usage)
-- Performance issues (nested loops, excessive calculations)
-
-## 📊 Statistics & Monitoring
-
-Track system performance in real-time:
-```lua
--- Get current statistics
-local stats = DexEnhanced:GetStats()
-
--- Monitor decompilation success rate
-print("Success Rate:", stats.successRate .. "%")
-
--- Check cache efficiency
-print("Cache Hits:", stats.cached)
-
--- View total operations
-print("Total Decompiled:", stats.total)
-```
-
-## 🤝 Contributing
-
-This is an enhanced version of the original Dex Explorer. Improvements include:
-- Complete rewrite of decompiler core
-- Advanced caching system
-- Script analysis engine
-- Modern syntax highlighting
-- Comprehensive error handling
-- Type annotations for better IDE support
-
-## 📝 License
-
-Original Dex by Moon
-Enhanced version by Capy
-
-## 🔗 Compatibility
-
-- **Executors**: Synapse X, Script-Ware, Krnl, Fluxus, and any executor with `decompile()` function
-- **Games**: All Roblox games
-- **Scripts**: LocalScript, Script, ModuleScript
-
-## ⚠️ Disclaimer
-
-This tool is for educational purposes only. Use responsibly and in accordance with Roblox Terms of Service.
+- This is CLIENT-SIDE only, you can't access server scripts
+- Some games have protected remotes that won't log args
+- Anti-cheats can detect hookmetamethod usage
+- Bytecode comparison only works if scripts haven't changed
+- Some executors have limited decompiler quality
 
 ---
 
 **Version**: 3.0.0  
-**Last Updated**: 2024  
-**Author**: Enhanced by Capy | Original by Moon
+**No bloat, no error handling spam, just raw functionality**
